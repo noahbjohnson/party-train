@@ -94,13 +94,13 @@
   top: 40px;
   left: 100px;
   right: 180px;
-  bottom: 160px;
+  bottom: 120px;
   overflow: hidden;
 }
 
 .train-row {
   position: relative;
-  height: 80px;
+  height: 100px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
@@ -130,13 +130,25 @@
 
 /* train-label removed — names are in the right panel only */
 
+/* === Drop Indicator === */
+.drop-indicator {
+  position: absolute;
+  width: 2px;
+  background: #FFD700;
+  border-radius: 1px;
+  z-index: 50;
+  pointer-events: none;
+  box-shadow: 0 0 6px rgba(255, 215, 0, 0.5);
+  transition: left 0.1s ease-out;
+}
+
 /* === Hand Area === */
 .hand-area {
   position: absolute;
   left: 100px;
   right: 180px;
   bottom: 0;
-  height: 160px;
+  height: 120px;
   background: rgba(0, 0, 0, 0.15);
   overflow: hidden;
   padding: 8px;
@@ -163,14 +175,14 @@
   top: 40px;
   right: 0;
   width: 180px;
-  bottom: 160px;
+  bottom: 120px;
   background: rgba(0, 0, 0, 0.2);
   z-index: 100;
   overflow-y: auto;
 }
 
 .panel-row {
-  height: 80px;
+  height: 100px;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -225,7 +237,7 @@
   right: 0;
   bottom: 0;
   width: 180px;
-  height: 160px;
+  height: 120px;
   background: rgba(0, 0, 0, 0.25);
   padding: 12px;
   z-index: 100;

@@ -58,7 +58,17 @@ const atlas = generateTileAtlas();
 const tileRenderer = new TileRenderer(atlas, gameAreaEl);
 const handTileRenderer = new TileRenderer(atlas, handAreaEl);
 const gridLayout = new GridLayout();
-const handRenderer = new HandRenderer(gridLayout, handTileRenderer);
+const handRenderer = new HandRenderer(gridLayout, handTileRenderer, handAreaEl);
+handRenderer.setReorderCallback((fromIndex, toIndex) => {
+  const state = controller.getState();
+  const human = state.players[0];
+  if (!human) return;
+  const tile = human.hand.splice(fromIndex, 1)[0];
+  if (tile) {
+    human.hand.splice(toIndex, 0, tile);
+    renderState(state);
+  }
+});
 const trainRowRenderer = new TrainRowRenderer(gridLayout, tileRenderer);
 const animationManager = new AnimationManager();
 
@@ -67,6 +77,7 @@ const topBar = new TopBar(topBarEl);
 const sidebar = new Sidebar(sidebarEl, eventBus);
 const playerPanel = new PlayerPanel(playerPanelEl);
 const infoPanel = new InfoPanel(infoPanelEl);
+infoPanel.setAtlas(atlas);
 const toastManager = new ToastManager(toastContainerEl);
 const scoreOverlay = new ScoreOverlay(app, eventBus);
 const setupScreen = new SetupScreen(app, eventBus);

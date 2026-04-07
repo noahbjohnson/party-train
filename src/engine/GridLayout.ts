@@ -45,9 +45,9 @@ const DEFAULT_CONFIG: GridConfig = {
   canvasHeight: 720,
   sidebarWidth: 100,
   infoPanelWidth: 180,
-  handAreaHeight: 160,
+  handAreaHeight: 120,
   topBarHeight: 40,
-  trainRowHeight: 80,
+  trainRowHeight: 100,
   tilePadding: 4,
 };
 
@@ -95,11 +95,12 @@ export class GridLayout {
       tileScale,
     }));
 
-    // Hand tiles are bigger
-    const handTileScale = 0.85;
-    const handTileWidth = Math.floor(ATLAS_TILE_W * handTileScale);
-    const handTileHeight = Math.floor(ATLAS_TILE_H * handTileScale);
-    const tilesPerRow = Math.floor(trainAreaWidth / (handTileWidth + this.config.tilePadding));
+    // Hand tiles are landscape (rotated 90°), so visual width = atlas height * scale
+    const handTileScale = 0.7;
+    const handTileWidth = Math.floor(ATLAS_TILE_W * handTileScale);   // DOM element width
+    const handTileHeight = Math.floor(ATLAS_TILE_H * handTileScale);  // DOM element height
+    const handVisualWidth = handTileHeight; // after rotation, visual width = DOM height
+    const tilesPerRow = Math.floor(trainAreaWidth / (handVisualWidth + this.config.tilePadding));
 
     const hand: HandLayout = {
       x: 0,
@@ -173,12 +174,27 @@ export class GridLayout {
     };
   }
 
+  /**
+   * Get DOM position for a hand tile (landscape/rotated 90°).
+   * Bakes in rotation offset so visual position is correct.
+   */
   getHandTilePosition(hand: HandLayout, tileIndex: number): { x: number; y: number } {
+    const visualW = hand.tileHeight; // rotated: visual width = DOM height
+    const visualH = hand.tileWidth;  // rotated: visual height = DOM width
+    const rotOffsetX = (hand.tileHeight - hand.tileWidth) / 2;
+    const rotOffsetY = (hand.tileWidth - hand.tileHeight) / 2;
+
     const row = Math.floor(tileIndex / hand.tilesPerRow);
     const col = tileIndex % hand.tilesPerRow;
+
+    // Visual position
+    const visualX = col * (visualW + this.config.tilePadding) + this.config.tilePadding;
+    const visualY = row * (visualH + this.config.tilePadding) + this.config.tilePadding;
+
+    // Convert to DOM position
     return {
-      x: col * (hand.tileWidth + this.config.tilePadding) + this.config.tilePadding,
-      y: row * (hand.tileHeight + this.config.tilePadding) + this.config.tilePadding,
+      x: visualX + rotOffsetX,
+      y: visualY + rotOffsetY,
     };
   }
 }

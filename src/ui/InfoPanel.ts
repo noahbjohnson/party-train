@@ -1,8 +1,12 @@
+import { AtlasInfo } from '../engine/TileAtlas.js';
+import { generateFullSet } from '../game/TileSet.js';
+
 export class InfoPanel {
   private container: HTMLElement;
   private bonePileEl: HTMLElement;
   private startDoubleEl: HTMLElement;
   private bestTrainEl: HTMLElement;
+  private atlas: AtlasInfo | null = null;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -43,12 +47,43 @@ export class InfoPanel {
     this.container.appendChild(bestSection);
   }
 
+  setAtlas(atlas: AtlasInfo): void {
+    this.atlas = atlas;
+  }
+
   updateBonePile(count: number): void {
     this.bonePileEl.textContent = String(count);
   }
 
   updateStartDouble(hubValue: number): void {
-    this.startDoubleEl.textContent = `[${hubValue}|${hubValue}]`;
+    this.startDoubleEl.textContent = '';
+
+    if (!this.atlas) {
+      this.startDoubleEl.textContent = `[${hubValue}|${hubValue}]`;
+      return;
+    }
+
+    // Find the double tile's ID in the full set
+    const fullSet = generateFullSet();
+    const doubleTile = fullSet.find(t => t.isDouble && t.sideA === hubValue);
+    if (!doubleTile) return;
+
+    const tileEl = document.createElement('div');
+    const scale = 0.55;
+    const w = Math.floor(this.atlas.tileWidth * scale);
+    const h = Math.floor(this.atlas.tileHeight * scale);
+    tileEl.style.width = `${w}px`;
+    tileEl.style.height = `${h}px`;
+    tileEl.style.backgroundImage = `url(${this.atlas.canvas.toDataURL()})`;
+    tileEl.style.backgroundSize = `${this.atlas.cols * w}px auto`;
+    tileEl.style.borderRadius = '3px';
+    tileEl.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+
+    const col = doubleTile.id % this.atlas.cols;
+    const row = Math.floor(doubleTile.id / this.atlas.cols);
+    tileEl.style.backgroundPosition = `-${col * w}px -${row * h}px`;
+
+    this.startDoubleEl.appendChild(tileEl);
   }
 
   updateBestTrain(status: 'green' | 'yellow' | 'red'): void {
