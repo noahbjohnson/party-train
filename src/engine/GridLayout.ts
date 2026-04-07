@@ -56,22 +56,25 @@ export class GridLayout {
     this.config = { ...DEFAULT_CONFIG, ...config };
   }
 
+  /**
+   * Update layout dimensions. Reads actual container sizes from the DOM
+   * when containers are provided, eliminating hardcoded pixel values.
+   */
+  updateFromDOM(gameArea: HTMLElement, handArea: HTMLElement): void {
+    const gameRect = gameArea.getBoundingClientRect();
+    const handRect = handArea.getBoundingClientRect();
+    this.config.canvasWidth = window.innerWidth;
+    this.config.canvasHeight = window.innerHeight;
+    // These are now derived from actual rendered sizes
+    this.config.sidebarWidth = gameRect.left;
+    this.config.infoPanelWidth = window.innerWidth - gameRect.right;
+    this.config.topBarHeight = gameRect.top;
+    this.config.handAreaHeight = handRect.height;
+  }
+
   update(canvasWidth: number, canvasHeight: number): void {
     this.config.canvasWidth = canvasWidth;
     this.config.canvasHeight = canvasHeight;
-
-    // Responsive adjustments for mobile landscape
-    if (canvasHeight <= 500) {
-      this.config.sidebarWidth = 70;
-      this.config.infoPanelWidth = 140;
-      this.config.topBarHeight = 28;
-      this.config.handAreaHeight = 80;
-    } else {
-      this.config.sidebarWidth = 100;
-      this.config.infoPanelWidth = 180;
-      this.config.topBarHeight = 40;
-      this.config.handAreaHeight = 120;
-    }
   }
 
   getConfig(): GridConfig {

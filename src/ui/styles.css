@@ -1,21 +1,24 @@
-/* === Layout === */
+/* === Layout — CSS Grid, no fixed pixel heights === */
 #app {
-  position: relative;
   width: 100%;
   height: 100%;
   background: #008B8B;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color: #fff;
   overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr minmax(60px, 15vh);
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "topbar  topbar  topbar"
+    "sidebar game    panel"
+    "sidebar hand    info";
 }
 
 /* === Top Bar === */
 .top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 40px;
+  grid-area: topbar;
+  height: 36px;
   background: rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
@@ -41,17 +44,15 @@
 
 /* === Sidebar === */
 .sidebar {
-  position: absolute;
-  top: 40px;
-  left: 0;
-  width: 100px;
-  bottom: 0;
+  grid-area: sidebar;
+  width: 80px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 8px;
+  gap: 6px;
+  padding: 8px 6px;
   background: rgba(0, 0, 0, 0.2);
   z-index: 100;
+  overflow-y: auto;
 }
 
 .sidebar-btn {
@@ -90,11 +91,8 @@
 
 /* === Game Area === */
 .game-area {
-  position: absolute;
-  top: 40px;
-  left: 100px;
-  right: 180px;
-  bottom: 120px;
+  grid-area: game;
+  position: relative;
   overflow: hidden;
 }
 
@@ -143,11 +141,9 @@
 
 /* === Hand Area === */
 .hand-area {
-  position: absolute;
-  left: 100px;
-  right: 180px;
-  bottom: 0;
-  height: 120px;
+  grid-area: hand;
+  position: relative;
+  min-height: 60px;
   background: rgba(0, 0, 0, 0.15);
   overflow: hidden;
   padding: 8px;
@@ -170,11 +166,8 @@
 
 /* === Player Panel (right) === */
 .player-panel {
-  position: absolute;
-  top: 40px;
-  right: 0;
+  grid-area: panel;
   width: 180px;
-  bottom: 120px;
   background: rgba(0, 0, 0, 0.2);
   z-index: 100;
   overflow-y: auto;
@@ -233,18 +226,26 @@
 
 /* === Info Panel (bottom-right) === */
 .info-panel {
-  position: absolute;
-  right: 0;
-  bottom: 0;
+  grid-area: info;
   width: 180px;
-  height: 120px;
   background: rgba(0, 0, 0, 0.25);
-  padding: 12px;
+  padding: 8px 12px;
   z-index: 100;
+  overflow: hidden;
+}
+
+.info-top-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.info-group {
+  flex: 1;
 }
 
 .info-section {
-  margin-bottom: 12px;
+  margin-bottom: 0;
 }
 
 .info-label {
@@ -261,7 +262,7 @@
 }
 
 .bone-pile-count {
-  font-size: 28px;
+  font-size: 22px;
 }
 
 /* === Toast === */
@@ -696,154 +697,24 @@
 }
 
 /* === Mobile Landscape === */
+/* === Small viewport tweaks (font sizes only — grid handles layout) === */
 @media (max-height: 500px) {
-  .top-bar {
-    height: 28px;
-    padding: 0 8px;
-  }
-
-  .round-indicator {
-    font-size: 12px;
-  }
-
-  .sidebar {
-    top: 28px;
-    width: 70px;
-  }
-
-  .sidebar-btn {
-    padding: 6px 4px;
-    font-size: 10px;
-  }
-
-  .game-area {
-    top: 28px;
-    left: 70px;
-    right: 140px;
-    bottom: 80px;
-  }
-
-  .hand-area {
-    left: 70px;
-    right: 140px;
-    height: 80px;
-  }
-
-  .player-panel {
-    top: 28px;
-    width: 140px;
-    bottom: 80px;
-  }
-
-  .panel-row {
-    height: 50px;
-    padding: 0 6px;
-  }
-
-  .panel-name {
-    font-size: 10px;
-  }
-
-  .panel-detail {
-    font-size: 10px;
-  }
-
-  .info-panel {
-    width: 140px;
-    height: 80px;
-    padding: 6px;
-  }
-
-  .info-label {
-    font-size: 9px;
-  }
-
-  .info-value {
-    font-size: 14px;
-  }
-
-  .bone-pile-count {
-    font-size: 20px;
-  }
+  .top-bar { height: 28px; padding: 0 8px; }
+  .round-indicator { font-size: 12px; }
+  .sidebar { width: 60px; }
+  .sidebar-btn { padding: 4px; font-size: 10px; }
+  .player-panel { width: 130px; }
+  .panel-name { font-size: 10px; }
+  .panel-detail { font-size: 10px; }
+  .info-panel { width: 130px; padding: 4px 8px; }
+  .info-label { font-size: 9px; }
+  .info-value { font-size: 13px; }
+  .bone-pile-count { font-size: 18px; }
 }
 
-/* === Mobile Portrait === */
-@media (max-width: 768px) and (min-height: 501px) {
-  .top-bar {
-    height: 32px;
-    padding: 0 8px;
-  }
-
-  .round-indicator {
-    font-size: 13px;
-  }
-
-  .sidebar {
-    top: 32px;
-    left: 0;
-    right: 0;
-    bottom: auto;
-    width: auto;
-    height: 40px;
-    flex-direction: row;
-    gap: 4px;
-    padding: 4px;
-    overflow-x: auto;
-  }
-
-  .sidebar-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    white-space: nowrap;
-    min-width: auto;
-  }
-
-  .game-area {
-    top: 72px;
-    left: 0;
-    right: 0;
-    bottom: 100px;
-  }
-
-  .train-row {
-    height: 60px;
-  }
-
-  .hand-area {
-    left: 0;
-    right: 0;
-    height: 100px;
-  }
-
-  .player-panel {
-    display: none;
-  }
-
-  .info-panel {
-    display: none;
-  }
-
-  .tile:hover {
-    transform: none;
-  }
-
-  .setup-panel {
-    padding: 24px;
-    min-width: auto;
-    width: 90vw;
-  }
-
-  .setup-panel h1 {
-    font-size: 22px;
-  }
-
-  .help-panel {
-    width: 95vw;
-  }
-
-  .score-panel {
-    min-width: auto;
-    width: 90vw;
-    padding: 20px;
-  }
+@media (max-width: 600px) {
+  .sidebar { width: 60px; }
+  .sidebar-btn { padding: 4px; font-size: 10px; }
+  .player-panel { width: 120px; }
+  .info-panel { width: 120px; }
 }

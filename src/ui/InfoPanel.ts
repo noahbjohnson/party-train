@@ -12,18 +12,36 @@ export class InfoPanel {
     this.container = container;
     this.container.className = 'info-panel';
 
-    const boneSection = document.createElement('div');
-    boneSection.className = 'info-section';
+    // Top row: Bone Pile count + Best Train light side by side
+    const topRow = document.createElement('div');
+    topRow.className = 'info-top-row';
+
+    const boneGroup = document.createElement('div');
+    boneGroup.className = 'info-group';
     const boneLabel = document.createElement('div');
     boneLabel.className = 'info-label';
     boneLabel.textContent = 'Bone Pile';
-    boneSection.appendChild(boneLabel);
+    boneGroup.appendChild(boneLabel);
     this.bonePileEl = document.createElement('div');
     this.bonePileEl.className = 'info-value bone-pile-count';
     this.bonePileEl.textContent = '0';
-    boneSection.appendChild(this.bonePileEl);
-    this.container.appendChild(boneSection);
+    boneGroup.appendChild(this.bonePileEl);
+    topRow.appendChild(boneGroup);
 
+    const bestGroup = document.createElement('div');
+    bestGroup.className = 'info-group';
+    const bestLabel = document.createElement('div');
+    bestLabel.className = 'info-label';
+    bestLabel.textContent = 'Best Train';
+    bestGroup.appendChild(bestLabel);
+    this.bestTrainEl = document.createElement('div');
+    this.bestTrainEl.className = 'info-value best-train-light';
+    bestGroup.appendChild(this.bestTrainEl);
+    topRow.appendChild(bestGroup);
+
+    this.container.appendChild(topRow);
+
+    // Bottom: Start Double tile
     const doubleSection = document.createElement('div');
     doubleSection.className = 'info-section';
     const doubleLabel = document.createElement('div');
@@ -34,17 +52,6 @@ export class InfoPanel {
     this.startDoubleEl.className = 'info-value start-double';
     doubleSection.appendChild(this.startDoubleEl);
     this.container.appendChild(doubleSection);
-
-    const bestSection = document.createElement('div');
-    bestSection.className = 'info-section';
-    const bestLabel = document.createElement('div');
-    bestLabel.className = 'info-label';
-    bestLabel.textContent = 'Best Train';
-    bestSection.appendChild(bestLabel);
-    this.bestTrainEl = document.createElement('div');
-    this.bestTrainEl.className = 'info-value best-train-light';
-    bestSection.appendChild(this.bestTrainEl);
-    this.container.appendChild(bestSection);
   }
 
   setAtlas(atlas: AtlasInfo): void {
@@ -63,16 +70,14 @@ export class InfoPanel {
       return;
     }
 
-    // Find the double tile's ID in the full set
     const fullSet = generateFullSet();
     const doubleTile = fullSet.find(t => t.isDouble && t.sideA === hubValue);
     if (!doubleTile) return;
 
-    const scale = 0.6;
+    const scale = 0.45;
     const w = Math.floor(this.atlas.tileWidth * scale);
     const h = Math.floor(this.atlas.tileHeight * scale);
 
-    // Wrapper to contain the rotated tile without layout overflow
     const wrapper = document.createElement('div');
     wrapper.style.width = `${h}px`;
     wrapper.style.height = `${w}px`;
@@ -87,7 +92,6 @@ export class InfoPanel {
     tileEl.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
     tileEl.style.transform = 'rotate(90deg)';
     tileEl.style.position = 'absolute';
-    // Offset to center the rotated tile in the wrapper
     tileEl.style.left = `${(h - w) / 2}px`;
     tileEl.style.top = `${(w - h) / 2}px`;
 
@@ -106,8 +110,8 @@ export class InfoPanel {
     light.className = 'traffic-light';
     light.style.backgroundColor = colors[status];
     light.style.display = 'inline-block';
-    light.style.width = '20px';
-    light.style.height = '20px';
+    light.style.width = '18px';
+    light.style.height = '18px';
     light.style.borderRadius = '50%';
     this.bestTrainEl.appendChild(light);
   }

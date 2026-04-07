@@ -92,6 +92,7 @@ let selectedTileId: number | null = null;
 let currentSortMode: SortMode = 'total';
 let isProcessingAI = false;
 let previousState: GameState | null = null;
+let hasDrawnThisTurn = false;
 const soundManager = new SoundManager();
 
 // --- Deep Clone Helper ---
@@ -154,6 +155,7 @@ function startRound(): void {
   const state = controller.getState();
   tileRenderer.clearAll();
   handTileRenderer.clearAll();
+  updateLayout();
 
   // Update layout
   const trainIds = [...state.trains.keys()];
@@ -249,6 +251,7 @@ function startPlayerTurn(): void {
   // Human turn — save state for undo
   previousState = cloneGameState(currentState);
   selectedTileId = null;
+  hasDrawnThisTurn = false;
   sidebar.disableAll();
 
   const moves = controller.getLegalMovesForCurrentPlayer();
@@ -363,7 +366,9 @@ function handleTrainClick(trainId: string): void {
 }
 
 function handleDraw(): void {
-  if (isProcessingAI) return;
+  if (isProcessingAI || hasDrawnThisTurn) return;
+  if (controller.getState().boneyard.length === 0) return;
+  hasDrawnThisTurn = true;
 
   controller.drawTile();
   soundManager.playTileDraw();
@@ -675,12 +680,17 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
 });
 
 // --- Window resize ---
+function updateLayout(): void {
+  gridLayout.updateFromDOM(gameAreaEl, handAreaEl);
+}
+
 window.addEventListener('resize', () => {
-  gridLayout.update(window.innerWidth, window.innerHeight);
+  updateLayout();
   const state = controller?.getState();
   if (state) renderState(state);
 });
 
 // --- Init ---
-gridLayout.update(window.innerWidth, window.innerHeight);
+// Initial layout update after first render frame
+requestAnimationFrame(() => updateLayout());
 setupScreen.show();
