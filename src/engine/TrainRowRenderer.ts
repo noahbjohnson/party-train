@@ -34,7 +34,9 @@ export class TrainRowRenderer {
       if (played.tile.isDouble) {
         this.tileRenderer.setRotation(played.tile.id, 0);
       } else {
-        const rotation = played.orientation === 'normal' ? 90 : -90;
+        // normal: sideA connects (left), sideB is open end (right) → rotate -90°
+        // flipped: sideB connects (left), sideA is open end (right) → rotate 90°
+        const rotation = played.orientation === 'normal' ? -90 : 90;
         this.tileRenderer.setRotation(played.tile.id, rotation);
       }
     }

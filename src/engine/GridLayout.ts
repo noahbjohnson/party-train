@@ -155,10 +155,13 @@ export class GridLayout {
         y: row.y + (row.height - scaledH) / 2,
       };
     } else {
-      // Convert visual position to DOM position by applying rotation offset
+      // Convert visual position to DOM position by applying rotation offset.
+      // CSS rotate(90deg) around center: visual_topleft = (domX + (W-H)/2, domY + (H-W)/2)
+      // So: domX = visualX + (H-W)/2 = visualX + rotOffsetX
+      //     domY = visualY + (W-H)/2 = visualY + rotOffsetY
       return {
-        x: visualX - rotOffsetX,
-        y: row.y + (row.height - scaledW) / 2 - rotOffsetY,
+        x: visualX + rotOffsetX,
+        y: row.y + (row.height - scaledW) / 2 + rotOffsetY,
       };
     }
   }
