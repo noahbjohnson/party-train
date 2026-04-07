@@ -20,7 +20,10 @@ import { Sidebar } from './ui/Sidebar.js';
 import { ToastManager } from './ui/ToastManager.js';
 import { SetupScreen } from './ui/SetupScreen.js';
 import { ScoreOverlay } from './ui/ScoreOverlay.js';
-import { AIStrategy, Difficulty, GameState, LegalMove, SortMode } from './types.js';
+import { SoundManager } from './audio/SoundManager.js';
+import { HelpOverlay } from './ui/HelpOverlay.js';
+import { saveGame, loadGame, clearSave } from './utils/SaveManager.js';
+import { AIStrategy, Difficulty, GameState, LegalMove, SortMode, Tile, Train, Player } from './types.js';
 import { AI_THINK_DELAY } from './utils/Constants.js';
 
 // --- DOM Setup ---
@@ -67,12 +70,42 @@ const infoPanel = new InfoPanel(infoPanelEl);
 const toastManager = new ToastManager(toastContainerEl);
 const scoreOverlay = new ScoreOverlay(app, eventBus);
 const setupScreen = new SetupScreen(app, eventBus);
+const helpOverlay = new HelpOverlay(app);
+
+// Wire sidebar Help button
+sidebar.setHelpToggle(() => helpOverlay.toggle());
 
 // --- Game State ---
 let controller: GameController;
 let selectedTileId: number | null = null;
 let currentSortMode: SortMode = 'total';
 let isProcessingAI = false;
+let previousState: GameState | null = null;
+const soundManager = new SoundManager();
+
+// --- Deep Clone Helper ---
+function cloneGameState(state: GameState): GameState {
+  const clonedPlayers: Player[] = state.players.map(p => ({
+    ...p,
+    hand: [...p.hand],
+  }));
+
+  const clonedTrains = new Map<string, Train>();
+  for (const [key, train] of state.trains) {
+    clonedTrains.set(key, {
+      ...train,
+      tiles: train.tiles.map(pt => ({ ...pt })),
+    });
+  }
+
+  return {
+    ...state,
+    players: clonedPlayers,
+    trains: clonedTrains,
+    boneyard: [...state.boneyard],
+    turnLog: state.turnLog.map(a => ({ ...a })),
+  };
+}
 
 function createAI(difficulty: Difficulty): AIStrategy {
   switch (difficulty) {
@@ -201,7 +234,8 @@ function startPlayerTurn(): void {
     return;
   }
 
-  // Human turn
+  // Human turn — save state for undo
+  previousState = cloneGameState(currentState);
   selectedTileId = null;
   sidebar.disableAll();
 
@@ -282,6 +316,7 @@ function handleTrainClick(trainId: string): void {
 
   // Play the tile
   controller.playTile(move);
+  soundManager.playTilePlace();
   selectedTileId = null;
 
   const newState = controller.getState();
@@ -319,6 +354,7 @@ function handleDraw(): void {
   if (isProcessingAI) return;
 
   controller.drawTile();
+  soundManager.playTileDraw();
   const state = controller.getState();
   toastManager.show('Drew a tile');
 
@@ -332,6 +368,7 @@ function handleDraw(): void {
     sidebar.enableButton('sort');
   } else {
     // Already marked train in checkDrawnTile
+    soundManager.playMarker();
     toastManager.show('Cannot play — train marked open');
     renderState(controller.getState());
     advanceToNextTurn();
@@ -341,6 +378,7 @@ function handleDraw(): void {
 function handlePass(): void {
   if (isProcessingAI) return;
   controller.markTrainAndEndTurn();
+  soundManager.playMarker();
   toastManager.show('Pass — train marked open');
   renderState(controller.getState());
   advanceToNextTurn();
@@ -362,6 +400,57 @@ function handleSort(): void {
 
   renderState(state);
   toastManager.show(`Sorted by ${currentSortMode}`);
+}
+
+function handleUndo(): void {
+  if (isProcessingAI || !previousState) return;
+
+  // Only allow undo on the human player's turn
+  const state = controller.getState();
+  const currentPlayer = state.players[state.currentPlayerIndex];
+  if (!currentPlayer?.isHuman) return;
+
+  controller.setState(cloneGameState(previousState));
+  selectedTileId = null;
+  previousState = null;
+
+  // Re-render and restart the human turn
+  const restored = controller.getState();
+  tileRenderer.clearAll();
+  handTileRenderer.clearAll();
+
+  // Rebuild train row elements
+  const trainIds = [...restored.trains.keys()];
+  const layout = gridLayout.computeLayout(trainIds, 'player-0');
+  gameAreaEl.textContent = '';
+  for (const row of layout.trainRows) {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'train-row';
+    rowEl.dataset['trainId'] = row.trainId;
+    rowEl.style.height = `${row.height}px`;
+    rowEl.addEventListener('click', () => {
+      if (selectedTileId !== null && !isProcessingAI) {
+        handleTrainClick(row.trainId);
+      }
+    });
+    gameAreaEl.appendChild(rowEl);
+  }
+
+  renderState(restored);
+  toastManager.show('Undo!');
+
+  // Re-enable controls for the human turn
+  sidebar.disableAll();
+  const moves = controller.getLegalMovesForCurrentPlayer();
+  if (moves.length > 0) {
+    handRenderer.highlightPlayable(new Set(moves.map(m => m.tile.id)));
+    sidebar.enableButton('sort');
+  } else if (restored.boneyard.length > 0) {
+    sidebar.enableButton('draw');
+    sidebar.pulseButton('draw');
+  } else {
+    sidebar.enableButton('pass');
+  }
 }
 
 function processAITurn(state: GameState): void {
@@ -405,14 +494,17 @@ function processAITurn(state: GameState): void {
 
 function advanceToNextTurn(): void {
   controller.advanceTurn();
+  saveGame(controller.getState());
   setTimeout(() => startPlayerTurn(), 200);
 }
 
 function handleRoundEnd(): void {
+  soundManager.playRoundEnd();
   const state = controller.getState();
 
   if (state.round >= 12) {
-    // Game over
+    // Game over — clear saved game
+    clearSave();
     const winnerId = state.winnerId ?? 0;
     scoreOverlay.showGameOver(state.players, winnerId);
   } else {
@@ -422,6 +514,7 @@ function handleRoundEnd(): void {
 
 // --- Event Wiring ---
 eventBus.on('ui:newGame', ({ playerCount, difficulty, playerName }) => {
+  clearSave();
   startGame(playerCount, difficulty, playerName);
 });
 
@@ -446,6 +539,46 @@ eventBus.on('input:sortRequested', () => {
   handleSort();
 });
 
+eventBus.on('input:undoRequested', () => {
+  handleUndo();
+});
+
+eventBus.on('ui:soundToggle', () => {
+  const enabled = soundManager.toggle();
+  sidebar.updateSoundLabel(enabled);
+});
+
+eventBus.on('ui:resumeGame', () => {
+  const saved = loadGame();
+  if (!saved) {
+    toastManager.show('No saved game found');
+    return;
+  }
+
+  // Determine config from saved state
+  const playerCount = saved.players.length;
+  // Default to medium difficulty for resumed games
+  const difficulty: Difficulty = 'medium';
+  const playerName = saved.players[0]?.name ?? 'Player';
+
+  controller = new GameController({
+    playerCount,
+    difficulty,
+    playerName,
+    firstTurnChainPlay: false,
+  });
+
+  controller.setState(saved);
+
+  // Register AI for non-human players
+  for (let i = 1; i < playerCount; i++) {
+    controller.registerAI(i, createAI(difficulty));
+  }
+
+  // Rebuild the board from saved state
+  startRound();
+});
+
 eventBus.on('input:tileSelected', ({ tileId }) => {
   handleTileClick(tileId);
 });
@@ -466,6 +599,11 @@ handAreaEl.addEventListener('click', (e: MouseEvent) => {
 // --- Keyboard ---
 document.addEventListener('keydown', (e: KeyboardEvent) => {
   if (isProcessingAI) return;
+
+  // Ignore keyboard shortcuts when an input/select/textarea is focused
+  const activeTag = document.activeElement?.tagName;
+  if (activeTag === 'INPUT' || activeTag === 'SELECT' || activeTag === 'TEXTAREA') return;
+
   if (e.key === ' ') {
     e.preventDefault();
     handleDraw();
@@ -475,6 +613,52 @@ document.addEventListener('keydown', (e: KeyboardEvent) => {
     selectedTileId = null;
     const state = controller?.getState();
     if (state) renderState(state);
+  } else if (e.key >= '1' && e.key <= '9') {
+    // Select the nth tile in the human player's hand (1-indexed)
+    const index = parseInt(e.key, 10) - 1;
+    const state = controller?.getState();
+    if (!state) return;
+    const human = state.players[0];
+    if (!human) return;
+    if (index < human.hand.length) {
+      const tile = human.hand[index];
+      if (tile) {
+        handleTileClick(tile.id);
+      }
+    }
+  } else if (e.key === 'Tab') {
+    e.preventDefault();
+    // Cycle through eligible trains when a tile is selected
+    if (selectedTileId === null) return;
+    const state = controller?.getState();
+    if (!state) return;
+    const moves = getLegalMoves(state, state.currentPlayerIndex)
+      .filter(m => m.tile.id === selectedTileId);
+    if (moves.length === 0) return;
+
+    const eligibleTrainIds = moves.map(m => m.trainId);
+    // Find all train row elements in DOM order
+    const rows = Array.from(gameAreaEl.querySelectorAll('.train-row')) as HTMLElement[];
+    const eligibleRows = rows.filter(r => eligibleTrainIds.includes(r.dataset['trainId'] ?? ''));
+    if (eligibleRows.length === 0) return;
+
+    // Find the currently highlighted eligible row (with 'tab-focus' class)
+    const currentFocusIndex = eligibleRows.findIndex(r => r.classList.contains('tab-focus'));
+    // Remove old focus
+    for (const r of eligibleRows) r.classList.remove('tab-focus');
+
+    const nextIndex = (currentFocusIndex + 1) % eligibleRows.length;
+    const nextRow = eligibleRows[nextIndex];
+    if (nextRow) {
+      nextRow.classList.add('tab-focus');
+      // If user presses Enter while tab-focused, play on that train
+    }
+  } else if (e.key === 'Enter') {
+    // Play on tab-focused train
+    const focusedRow = gameAreaEl.querySelector('.train-row.tab-focus') as HTMLElement | null;
+    if (focusedRow?.dataset['trainId'] && selectedTileId !== null) {
+      handleTrainClick(focusedRow.dataset['trainId']);
+    }
   }
 });
 

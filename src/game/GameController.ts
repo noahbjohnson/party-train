@@ -23,6 +23,10 @@ export class GameController {
     return this.state;
   }
 
+  setState(state: GameState): void {
+    this.state = state;
+  }
+
   initGame(): GameState {
     const players = [];
 

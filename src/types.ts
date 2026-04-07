@@ -121,6 +121,9 @@ export type GameEventMap = {
   'ui:newGame': { playerCount: number; difficulty: Difficulty; playerName: string };
   'ui:nextRound': Record<string, never>;
   'ui:restartGame': Record<string, never>;
+  'ui:menuToggle': Record<string, never>;
+  'ui:soundToggle': Record<string, never>;
+  'ui:resumeGame': Record<string, never>;
 };
 
 export type SortMode = 'left' | 'right' | 'total' | 'color';

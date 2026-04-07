@@ -460,3 +460,150 @@
 .open-marker {
   font-size: 14px;
 }
+
+/* === Menu Overlay === */
+.menu-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 20, 20, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.menu-panel {
+  background: #1a3a3a;
+  padding: 32px;
+  border-radius: 12px;
+  min-width: 280px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.menu-panel h2 {
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.menu-btn {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.menu-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.menu-btn-close {
+  margin-top: 8px;
+  opacity: 0.7;
+}
+
+/* === Help Overlay === */
+.help-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 20, 20, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2500;
+}
+
+.help-panel {
+  background: #1a3a3a;
+  padding: 0;
+  border-radius: 12px;
+  width: 520px;
+  max-width: 90vw;
+  max-height: 80vh;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.help-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-header h2 {
+  font-size: 20px;
+  margin: 0;
+}
+
+.help-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.help-close-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.help-content {
+  padding: 16px 24px 24px;
+  overflow-y: auto;
+}
+
+.help-section {
+  margin-bottom: 16px;
+}
+
+.help-section h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #FFD700;
+}
+
+.help-section ul {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.help-section li {
+  font-size: 13px;
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+/* === Resume Button === */
+.setup-resume-btn {
+  background: #3B82F6;
+  margin-bottom: 8px;
+}
+
+.setup-resume-btn:hover {
+  background: #2563EB;
+}
+
+/* === Tab Focus (train selection) === */
+.train-row.tab-focus {
+  background: rgba(255, 215, 0, 0.2);
+  outline: 2px solid rgba(255, 215, 0, 0.6);
+  outline-offset: -2px;
+}
