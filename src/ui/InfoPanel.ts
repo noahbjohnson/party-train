@@ -68,22 +68,35 @@ export class InfoPanel {
     const doubleTile = fullSet.find(t => t.isDouble && t.sideA === hubValue);
     if (!doubleTile) return;
 
-    const tileEl = document.createElement('div');
-    const scale = 0.55;
+    const scale = 0.6;
     const w = Math.floor(this.atlas.tileWidth * scale);
     const h = Math.floor(this.atlas.tileHeight * scale);
+
+    // Wrapper to contain the rotated tile without layout overflow
+    const wrapper = document.createElement('div');
+    wrapper.style.width = `${h}px`;
+    wrapper.style.height = `${w}px`;
+    wrapper.style.position = 'relative';
+
+    const tileEl = document.createElement('div');
     tileEl.style.width = `${w}px`;
     tileEl.style.height = `${h}px`;
     tileEl.style.backgroundImage = `url(${this.atlas.canvas.toDataURL()})`;
     tileEl.style.backgroundSize = `${this.atlas.cols * w}px auto`;
     tileEl.style.borderRadius = '3px';
     tileEl.style.boxShadow = '0 1px 3px rgba(0,0,0,0.3)';
+    tileEl.style.transform = 'rotate(90deg)';
+    tileEl.style.position = 'absolute';
+    // Offset to center the rotated tile in the wrapper
+    tileEl.style.left = `${(h - w) / 2}px`;
+    tileEl.style.top = `${(w - h) / 2}px`;
 
     const col = doubleTile.id % this.atlas.cols;
     const row = Math.floor(doubleTile.id / this.atlas.cols);
     tileEl.style.backgroundPosition = `-${col * w}px -${row * h}px`;
 
-    this.startDoubleEl.appendChild(tileEl);
+    wrapper.appendChild(tileEl);
+    this.startDoubleEl.appendChild(wrapper);
   }
 
   updateBestTrain(status: 'green' | 'yellow' | 'red'): void {
