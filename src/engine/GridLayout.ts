@@ -120,9 +120,10 @@ export class GridLayout {
   }
 
   /**
-   * Get position for a tile in a train row.
-   * Normal tiles are rotated 90° (landscape): they occupy scaledH x scaledW space.
-   * Doubles stay upright: they occupy scaledW x scaledH space (but row height limits them).
+   * Get the final DOM position for a tile in a train row.
+   * Accounts for CSS rotation offset so positions are ready to use directly.
+   * Normal tiles are rotated 90° (landscape): visually scaledH x scaledW.
+   * Doubles stay upright: scaledW x scaledH.
    */
   getTilePositionInRow(
     row: TrainRowLayout,
@@ -131,32 +132,35 @@ export class GridLayout {
   ): { x: number; y: number } {
     const scaledW = Math.floor(ATLAS_TILE_W * row.tileScale);
     const scaledH = Math.floor(ATLAS_TILE_H * row.tileScale);
+    // Rotation offset: CSS rotate(90deg) rotates around center, shifting the
+    // visual box relative to the DOM box. We bake this into positions here.
+    const rotOffsetX = (scaledH - scaledW) / 2;
+    const rotOffsetY = (scaledW - scaledH) / 2;
 
-    // Sum up x offsets for all tiles before this one
-    let x = row.x + this.config.tilePadding;
+    // Sum up visual x offsets for all tiles before this one
+    let visualX = row.x + this.config.tilePadding;
     for (let i = 0; i < tileIndex; i++) {
       const info = tilesInfo[i];
       if (info?.isDouble) {
-        // Doubles are upright: width = scaledW
-        x += scaledW + this.config.tilePadding;
+        visualX += scaledW + this.config.tilePadding;
       } else {
-        // Normal tiles are landscape: width = scaledH (height becomes width when rotated)
-        x += scaledH + this.config.tilePadding;
+        visualX += scaledH + this.config.tilePadding;
       }
     }
 
     const currentIsDouble = tilesInfo[tileIndex]?.isDouble ?? false;
-    let y: number;
     if (currentIsDouble) {
-      // Double stays upright, center vertically
-      y = row.y + (row.height - scaledH) / 2;
+      return {
+        x: visualX,
+        y: row.y + (row.height - scaledH) / 2,
+      };
     } else {
-      // Normal tile rotated 90°: element is still scaledW x scaledH in DOM,
-      // but visually it's scaledH x scaledW. Center the scaledW (visual height) vertically.
-      y = row.y + (row.height - scaledW) / 2;
+      // Convert visual position to DOM position by applying rotation offset
+      return {
+        x: visualX - rotOffsetX,
+        y: row.y + (row.height - scaledW) / 2 - rotOffsetY,
+      };
     }
-
-    return { x, y };
   }
 
   getScaledTrainTileSize(row: TrainRowLayout): { width: number; height: number } {
