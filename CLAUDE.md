@@ -36,10 +36,11 @@ Player vs 1-3 AI opponents. Clean 2D top-down aesthetic with horizontal train ro
 - Lowest total score across 13 rounds wins
 
 ## Current status
-Phase: 0 — Scaffolding
-Last completed: Project scaffold (folder structure, npm, configs, CLAUDE.md)
-Next up: Phase 1 — Core game logic (types.ts, Tile, TileSet, Train, Player, RuleEngine, TurnManager, RoundManager, GameController)
+Phase: 5 complete — All phases 1-5 implemented
+Last completed: Full game implementation — game logic, all 3 AI difficulties, DOM-based rendering (tile atlas, grid layout, train rows, hand), full UI overlay (sidebar, player panel, info panel, top bar, toasts, setup screen, score overlay), main.ts wiring
+Next up: Phase 6 — Polish (sound integration in game loop, mobile touch refinement, save/load, help overlay, animation refinement)
 Blocked on: Nothing
+Tests: 58 passing, typecheck clean, production build 33KB JS + 5KB CSS
 
 ## File ownership (for parallel work)
 <!-- Prevent merge conflicts by assigning file ownership to agents -->
