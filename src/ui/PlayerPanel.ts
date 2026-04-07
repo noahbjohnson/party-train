@@ -13,7 +13,7 @@ export class PlayerPanel {
    * Render player info rows aligned to train rows.
    * Order: AI players, Party Train, then human player — matching train row order.
    */
-  render(players: Player[], trains: Map<string, Train>, currentPlayerIndex: number): void {
+  render(players: Player[], trains: Map<string, Train>, currentPlayerIndex: number, rowHeight?: number): void {
     this.container.textContent = '';
 
     // Sort: AI players first, then party train slot, then human
@@ -29,6 +29,7 @@ export class PlayerPanel {
     for (const entry of rows) {
       const row = document.createElement('div');
       row.className = 'panel-row';
+      if (rowHeight) row.style.height = `${rowHeight}px`;
 
       if (entry.isParty) {
         row.classList.add('panel-row-party');

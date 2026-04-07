@@ -199,7 +199,8 @@ function renderState(state: GameState): void {
   }
 
   // Update player panel
-  playerPanel.render(state.players, state.trains, state.currentPlayerIndex);
+  const rowHeight = layout.trainRows[0]?.height ?? 100;
+  playerPanel.render(state.players, state.trains, state.currentPlayerIndex, rowHeight);
 
   // Update info panel
   infoPanel.updateBonePile(state.boneyard.length);

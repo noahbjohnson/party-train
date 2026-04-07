@@ -5,7 +5,6 @@ export interface GridConfig {
   infoPanelWidth: number;
   handAreaHeight: number;
   topBarHeight: number;
-  trainRowHeight: number;
   tilePadding: number;
 }
 
@@ -47,7 +46,6 @@ const DEFAULT_CONFIG: GridConfig = {
   infoPanelWidth: 180,
   handAreaHeight: 120,
   topBarHeight: 40,
-  trainRowHeight: 100,
   tilePadding: 4,
 };
 
@@ -61,6 +59,19 @@ export class GridLayout {
   update(canvasWidth: number, canvasHeight: number): void {
     this.config.canvasWidth = canvasWidth;
     this.config.canvasHeight = canvasHeight;
+
+    // Responsive adjustments for mobile landscape
+    if (canvasHeight <= 500) {
+      this.config.sidebarWidth = 70;
+      this.config.infoPanelWidth = 140;
+      this.config.topBarHeight = 28;
+      this.config.handAreaHeight = 80;
+    } else {
+      this.config.sidebarWidth = 100;
+      this.config.infoPanelWidth = 180;
+      this.config.topBarHeight = 40;
+      this.config.handAreaHeight = 120;
+    }
   }
 
   getConfig(): GridConfig {
@@ -68,7 +79,7 @@ export class GridLayout {
   }
 
   computeLayout(trainIds: string[], humanTrainId: string): LayoutResult {
-    const { canvasWidth, canvasHeight, sidebarWidth, infoPanelWidth, handAreaHeight, topBarHeight, trainRowHeight } = this.config;
+    const { canvasWidth, canvasHeight, sidebarWidth, infoPanelWidth, handAreaHeight, topBarHeight } = this.config;
 
     const trainAreaWidth = canvasWidth - sidebarWidth - infoPanelWidth;
     const trainAreaHeight = canvasHeight - topBarHeight - handAreaHeight;
@@ -80,17 +91,21 @@ export class GridLayout {
       humanTrainId,
     ].filter(id => trainIds.includes(id) || id === 'party');
 
+    // Compute row height from available space, capped at 100px max
+    const numRows = sortedTrainIds.length;
+    const computedRowHeight = numRows > 0 ? Math.min(100, Math.floor(trainAreaHeight / numRows)) : 100;
+
     // Scale tiles to fit within row height (with padding)
     const rowPadding = 8;
-    const availableHeight = trainRowHeight - rowPadding * 2;
+    const availableHeight = computedRowHeight - rowPadding * 2;
     const tileScale = Math.min(1, availableHeight / ATLAS_TILE_H);
 
     const trainRows: TrainRowLayout[] = sortedTrainIds.map((trainId, i) => ({
       trainId,
       x: 0,   // relative to game area
-      y: i * trainRowHeight,
+      y: i * computedRowHeight,
       width: trainAreaWidth,
-      height: trainRowHeight,
+      height: computedRowHeight,
       rowIndex: i,
       tileScale,
     }));
