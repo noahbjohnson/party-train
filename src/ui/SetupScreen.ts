@@ -43,10 +43,15 @@ export class SetupScreen {
     nameInput.className = 'setup-input';
     this.panel.appendChild(nameInput);
 
-    // Player count
+    // Player count + Difficulty side by side
+    const optionsRow = document.createElement('div');
+    optionsRow.className = 'setup-options-row';
+
+    const countGroup = document.createElement('div');
+    countGroup.className = 'setup-option-group';
     const countLabel = document.createElement('label');
     countLabel.textContent = 'Players';
-    this.panel.appendChild(countLabel);
+    countGroup.appendChild(countLabel);
     const countSelect = document.createElement('select');
     countSelect.className = 'setup-input';
     for (const n of [2, 3, 4]) {
@@ -56,12 +61,14 @@ export class SetupScreen {
       if (n === 4) opt.selected = true;
       countSelect.appendChild(opt);
     }
-    this.panel.appendChild(countSelect);
+    countGroup.appendChild(countSelect);
+    optionsRow.appendChild(countGroup);
 
-    // Difficulty
+    const diffGroup = document.createElement('div');
+    diffGroup.className = 'setup-option-group';
     const diffLabel = document.createElement('label');
     diffLabel.textContent = 'AI Difficulty';
-    this.panel.appendChild(diffLabel);
+    diffGroup.appendChild(diffLabel);
     const diffSelect = document.createElement('select');
     diffSelect.className = 'setup-input';
     for (const d of ['easy', 'medium', 'hard'] as Difficulty[]) {
@@ -71,7 +78,10 @@ export class SetupScreen {
       if (d === 'medium') opt.selected = true;
       diffSelect.appendChild(opt);
     }
-    this.panel.appendChild(diffSelect);
+    diffGroup.appendChild(diffSelect);
+    optionsRow.appendChild(diffGroup);
+
+    this.panel.appendChild(optionsRow);
 
     // Start button
     const startBtn = document.createElement('button');

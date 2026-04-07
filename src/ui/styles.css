@@ -389,6 +389,20 @@
   border-color: #22C55E;
 }
 
+.setup-options-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.setup-option-group {
+  flex: 1;
+}
+
+.setup-option-group label {
+  margin-top: 0;
+}
+
 .setup-start-btn {
   width: 100%;
   padding: 14px;
