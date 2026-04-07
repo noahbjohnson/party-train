@@ -123,17 +123,6 @@ function startRound(): void {
     rowEl.dataset['trainId'] = row.trainId;
     rowEl.style.height = `${row.height}px`;
 
-    const label = document.createElement('span');
-    label.className = 'train-label';
-    const train = state.trains.get(row.trainId);
-    if (train?.ownerId !== null && train?.ownerId !== undefined) {
-      const owner = state.players[train.ownerId];
-      label.textContent = owner?.name ?? row.trainId;
-    } else {
-      label.textContent = 'Party Train';
-    }
-    rowEl.appendChild(label);
-
     rowEl.addEventListener('click', () => {
       if (selectedTileId !== null && !isProcessingAI) {
         handleTrainClick(row.trainId);
@@ -145,7 +134,6 @@ function startRound(): void {
 
   // Update UI
   topBar.updateRound(state.round, state.hubValue);
-  topBar.updateScores(state.players);
   infoPanel.updateBonePile(state.boneyard.length);
   infoPanel.updateStartDouble(state.hubValue);
 
@@ -422,7 +410,6 @@ function advanceToNextTurn(): void {
 
 function handleRoundEnd(): void {
   const state = controller.getState();
-  topBar.updateScores(state.players);
 
   if (state.round >= 12) {
     // Game over

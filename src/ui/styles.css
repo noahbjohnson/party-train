@@ -93,14 +93,14 @@
   position: absolute;
   top: 40px;
   left: 100px;
-  right: 200px;
+  right: 180px;
   bottom: 160px;
   overflow: hidden;
 }
 
 .train-row {
   position: relative;
-  height: 70px;
+  height: 80px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
@@ -128,19 +128,13 @@
   50% { border-color: rgba(255, 0, 0, 0.7); }
 }
 
-.train-label {
-  position: absolute;
-  right: 8px;
-  top: 4px;
-  font-size: 11px;
-  opacity: 0.6;
-}
+/* train-label removed — names are in the right panel only */
 
 /* === Hand Area === */
 .hand-area {
   position: absolute;
   left: 100px;
-  right: 200px;
+  right: 180px;
   bottom: 0;
   height: 160px;
   background: rgba(0, 0, 0, 0.15);
@@ -168,46 +162,61 @@
   position: absolute;
   top: 40px;
   right: 0;
-  width: 200px;
+  width: 180px;
   bottom: 160px;
   background: rgba(0, 0, 0, 0.2);
-  padding: 8px;
   z-index: 100;
   overflow-y: auto;
 }
 
-.panel-player-row {
-  padding: 8px;
-  border-radius: 6px;
-  margin-bottom: 6px;
+.panel-row {
+  height: 80px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: background 0.2s;
 }
 
-.panel-player-row.panel-active {
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+.panel-row-active {
+  background: rgba(255, 215, 0, 0.12);
 }
 
-.panel-badge {
-  padding: 4px 8px;
+.panel-row-party {
+  opacity: 0.7;
+}
+
+.panel-name {
+  padding: 3px 8px;
   border-radius: 4px;
   font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 4px;
-  display: inline-block;
-}
-
-.panel-info {
-  display: flex;
-  gap: 8px;
   font-size: 12px;
-  opacity: 0.8;
-  margin-top: 2px;
+  white-space: nowrap;
 }
 
-.panel-open-marker {
+.panel-name-party {
+  background: #555;
+}
+
+.panel-detail {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.panel-tiles {
+  opacity: 0.5;
+}
+
+.panel-tiles::before {
+  content: '\1F0CF ';
+}
+
+.panel-open {
   color: #EF4444;
-  font-weight: 600;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.5px;
 }
 
 /* === Info Panel (bottom-right) === */
@@ -215,7 +224,7 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 200px;
+  width: 180px;
   height: 160px;
   background: rgba(0, 0, 0, 0.25);
   padding: 12px;

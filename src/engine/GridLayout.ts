@@ -44,7 +44,7 @@ const DEFAULT_CONFIG: GridConfig = {
   canvasWidth: 1280,
   canvasHeight: 720,
   sidebarWidth: 100,
-  infoPanelWidth: 200,
+  infoPanelWidth: 180,
   handAreaHeight: 160,
   topBarHeight: 40,
   trainRowHeight: 80,
