@@ -110,12 +110,11 @@ export class GridLayout {
       tileScale,
     }));
 
-    // Hand tiles are landscape (rotated 90°), scale to fit hand area height
+    // Hand tiles use the same scale as train tiles for visual consistency,
+    // but also cap to fit within the hand area height
     const handPadding = 8;
     const handAvailable = handAreaHeight - handPadding * 2;
-    // Visual height of rotated tile = DOM width = ATLAS_TILE_W * scale
-    // We want visual height to fit in handAvailable
-    const handTileScale = Math.min(0.7, handAvailable / ATLAS_TILE_W);
+    const handTileScale = Math.min(tileScale, handAvailable / ATLAS_TILE_W);
     const handTileWidth = Math.floor(ATLAS_TILE_W * handTileScale);   // DOM element width
     const handTileHeight = Math.floor(ATLAS_TILE_H * handTileScale);  // DOM element height
     const handVisualWidth = handTileHeight; // after rotation, visual width = DOM height
