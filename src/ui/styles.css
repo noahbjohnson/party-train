@@ -148,6 +148,10 @@
   padding: 8px;
 }
 
+.hand-area .tile {
+  position: absolute;
+}
+
 /* === Tiles === */
 .tile {
   border-radius: 4px;

@@ -129,8 +129,8 @@ export class GridLayout {
     const row = Math.floor(tileIndex / hand.tilesPerRow);
     const col = tileIndex % hand.tilesPerRow;
     return {
-      x: hand.x + col * (hand.tileWidth + this.config.tilePadding) + this.config.tilePadding,
-      y: hand.y + row * (hand.tileHeight + this.config.tilePadding) + this.config.tilePadding,
+      x: col * (hand.tileWidth + this.config.tilePadding) + this.config.tilePadding,
+      y: row * (hand.tileHeight + this.config.tilePadding) + this.config.tilePadding,
     };
   }
 }
