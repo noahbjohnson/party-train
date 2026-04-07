@@ -1,0 +1,1 @@
+// Right player info column

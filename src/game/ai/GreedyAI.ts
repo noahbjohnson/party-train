@@ -1,0 +1,1 @@
+// Medium difficulty — heuristic scoring
