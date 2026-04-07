@@ -27,14 +27,22 @@ export class TrainRowRenderer {
 
       // Apply scaled size for train tiles
       this.tileRenderer.setSize(played.tile.id, tileSize.width, tileSize.height);
-      this.tileRenderer.setPosition(played.tile.id, pos.x, pos.y);
 
       if (played.tile.isDouble) {
         // Doubles stay upright (crosswise to the train)
+        this.tileRenderer.setPosition(played.tile.id, pos.x, pos.y);
         this.tileRenderer.setRotation(played.tile.id, 0);
       } else {
-        // Normal tiles rotated 90° so they're landscape (left side connects, right side is open)
-        // If orientation is 'flipped', rotate -90 so sideB is on left (connecting) and sideA on right
+        // Normal tiles rotated 90° — CSS rotate happens around center,
+        // so the DOM box (W x H) doesn't change. We need to offset the
+        // position so the visual (H x W) box lands where the layout expects.
+        const offsetX = (tileSize.height - tileSize.width) / 2;
+        const offsetY = (tileSize.width - tileSize.height) / 2;
+        this.tileRenderer.setPosition(
+          played.tile.id,
+          pos.x - offsetX,
+          pos.y - offsetY,
+        );
         const rotation = played.orientation === 'normal' ? 90 : -90;
         this.tileRenderer.setRotation(played.tile.id, rotation);
       }
