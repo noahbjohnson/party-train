@@ -47,6 +47,19 @@ export class TileRenderer {
     rendered.element.style.top = `${y}px`;
   }
 
+  setSize(tileId: number, width: number, height: number): void {
+    const rendered = this.tiles.get(tileId);
+    if (!rendered) return;
+    rendered.element.style.width = `${width}px`;
+    rendered.element.style.height = `${height}px`;
+    rendered.element.style.backgroundSize = `${this.atlas.cols * width}px auto`;
+    // Recalculate background position for new size
+    const index = rendered.isFaceUp ? tileId : this.atlas.backIndex;
+    const col = index % this.atlas.cols;
+    const row = Math.floor(index / this.atlas.cols);
+    rendered.element.style.backgroundPosition = `-${col * width}px -${row * height}px`;
+  }
+
   setRotation(tileId: number, degrees: number): void {
     const rendered = this.tiles.get(tileId);
     if (!rendered) return;

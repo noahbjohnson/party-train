@@ -1,4 +1,4 @@
-import { Train, PlayedTile } from '../types.js';
+import { Train } from '../types.js';
 import { TileRenderer } from './TileRenderer.js';
 import { GridLayout, TrainRowLayout } from './GridLayout.js';
 
@@ -12,9 +12,12 @@ export class TrainRowRenderer {
   }
 
   renderTrain(train: Train, rowLayout: TrainRowLayout): void {
+    const tileSize = this.layout.getScaledTrainTileSize(rowLayout);
+    const tilesInfo = train.tiles.map(pt => ({ isDouble: pt.tile.isDouble }));
+
     for (let i = 0; i < train.tiles.length; i++) {
       const played = train.tiles[i]!;
-      const pos = this.layout.getTilePositionInRow(rowLayout, i);
+      const pos = this.layout.getTilePositionInRow(rowLayout, i, tilesInfo);
 
       // Ensure tile element exists
       let el = this.tileRenderer.getElement(played.tile.id);
@@ -22,13 +25,18 @@ export class TrainRowRenderer {
         this.tileRenderer.createTileElement(played.tile, true);
       }
 
+      // Apply scaled size for train tiles
+      this.tileRenderer.setSize(played.tile.id, tileSize.width, tileSize.height);
       this.tileRenderer.setPosition(played.tile.id, pos.x, pos.y);
 
-      // Doubles are rotated 90 degrees
       if (played.tile.isDouble) {
-        this.tileRenderer.setRotation(played.tile.id, 90);
-      } else {
+        // Doubles stay upright (crosswise to the train)
         this.tileRenderer.setRotation(played.tile.id, 0);
+      } else {
+        // Normal tiles rotated 90° so they're landscape (left side connects, right side is open)
+        // If orientation is 'flipped', rotate -90 so sideB is on left (connecting) and sideA on right
+        const rotation = played.orientation === 'normal' ? 90 : -90;
+        this.tileRenderer.setRotation(played.tile.id, rotation);
       }
     }
   }

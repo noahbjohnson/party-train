@@ -6,18 +6,17 @@ export interface GridConfig {
   handAreaHeight: number;
   topBarHeight: number;
   trainRowHeight: number;
-  tileWidth: number;
-  tileHeight: number;
   tilePadding: number;
 }
 
 export interface TrainRowLayout {
   trainId: string;
-  x: number;
-  y: number;
+  x: number;      // relative to game area container
+  y: number;      // relative to game area container
   width: number;
   height: number;
   rowIndex: number;
+  tileScale: number;  // scale factor for tiles in this row
 }
 
 export interface HandLayout {
@@ -33,22 +32,22 @@ export interface HandLayout {
 export interface LayoutResult {
   trainRows: TrainRowLayout[];
   hand: HandLayout;
-  trainAreaX: number;
-  trainAreaY: number;
   trainAreaWidth: number;
   trainAreaHeight: number;
 }
+
+// Atlas tile dimensions (source of truth from TileAtlas)
+const ATLAS_TILE_W = 60;
+const ATLAS_TILE_H = 120;
 
 const DEFAULT_CONFIG: GridConfig = {
   canvasWidth: 1280,
   canvasHeight: 720,
   sidebarWidth: 100,
   infoPanelWidth: 200,
-  handAreaHeight: 150,
+  handAreaHeight: 160,
   topBarHeight: 40,
-  trainRowHeight: 70,
-  tileWidth: 40,
-  tileHeight: 80,
+  trainRowHeight: 80,
   tilePadding: 4,
 };
 
@@ -71,8 +70,6 @@ export class GridLayout {
   computeLayout(trainIds: string[], humanTrainId: string): LayoutResult {
     const { canvasWidth, canvasHeight, sidebarWidth, infoPanelWidth, handAreaHeight, topBarHeight, trainRowHeight } = this.config;
 
-    const trainAreaX = sidebarWidth;
-    const trainAreaY = topBarHeight;
     const trainAreaWidth = canvasWidth - sidebarWidth - infoPanelWidth;
     const trainAreaHeight = canvasHeight - topBarHeight - handAreaHeight;
 
@@ -83,24 +80,31 @@ export class GridLayout {
       humanTrainId,
     ].filter(id => trainIds.includes(id) || id === 'party');
 
+    // Scale tiles to fit within row height (with padding)
+    const rowPadding = 8;
+    const availableHeight = trainRowHeight - rowPadding * 2;
+    const tileScale = Math.min(1, availableHeight / ATLAS_TILE_H);
+
     const trainRows: TrainRowLayout[] = sortedTrainIds.map((trainId, i) => ({
       trainId,
-      x: trainAreaX,
-      y: trainAreaY + i * trainRowHeight,
+      x: 0,   // relative to game area
+      y: i * trainRowHeight,
       width: trainAreaWidth,
       height: trainRowHeight,
       rowIndex: i,
+      tileScale,
     }));
 
-    const handTileWidth = 50;
-    const handTileHeight = 100;
-    const handAreaWidth = trainAreaWidth;
-    const tilesPerRow = Math.floor(handAreaWidth / (handTileWidth + this.config.tilePadding));
+    // Hand tiles are bigger
+    const handTileScale = 0.85;
+    const handTileWidth = Math.floor(ATLAS_TILE_W * handTileScale);
+    const handTileHeight = Math.floor(ATLAS_TILE_H * handTileScale);
+    const tilesPerRow = Math.floor(trainAreaWidth / (handTileWidth + this.config.tilePadding));
 
     const hand: HandLayout = {
-      x: trainAreaX,
-      y: canvasHeight - handAreaHeight,
-      width: handAreaWidth,
+      x: 0,
+      y: 0,
+      width: trainAreaWidth,
       height: handAreaHeight,
       tileWidth: handTileWidth,
       tileHeight: handTileHeight,
@@ -110,18 +114,55 @@ export class GridLayout {
     return {
       trainRows,
       hand,
-      trainAreaX,
-      trainAreaY,
       trainAreaWidth,
       trainAreaHeight,
     };
   }
 
-  getTilePositionInRow(row: TrainRowLayout, tileIndex: number): { x: number; y: number } {
-    const { tileWidth, tilePadding } = this.config;
+  /**
+   * Get position for a tile in a train row.
+   * Normal tiles are rotated 90° (landscape): they occupy scaledH x scaledW space.
+   * Doubles stay upright: they occupy scaledW x scaledH space (but row height limits them).
+   */
+  getTilePositionInRow(
+    row: TrainRowLayout,
+    tileIndex: number,
+    tilesInfo: Array<{ isDouble: boolean }>,
+  ): { x: number; y: number } {
+    const scaledW = Math.floor(ATLAS_TILE_W * row.tileScale);
+    const scaledH = Math.floor(ATLAS_TILE_H * row.tileScale);
+
+    // Sum up x offsets for all tiles before this one
+    let x = row.x + this.config.tilePadding;
+    for (let i = 0; i < tileIndex; i++) {
+      const info = tilesInfo[i];
+      if (info?.isDouble) {
+        // Doubles are upright: width = scaledW
+        x += scaledW + this.config.tilePadding;
+      } else {
+        // Normal tiles are landscape: width = scaledH (height becomes width when rotated)
+        x += scaledH + this.config.tilePadding;
+      }
+    }
+
+    const currentIsDouble = tilesInfo[tileIndex]?.isDouble ?? false;
+    let y: number;
+    if (currentIsDouble) {
+      // Double stays upright, center vertically
+      y = row.y + (row.height - scaledH) / 2;
+    } else {
+      // Normal tile rotated 90°: element is still scaledW x scaledH in DOM,
+      // but visually it's scaledH x scaledW. Center the scaledW (visual height) vertically.
+      y = row.y + (row.height - scaledW) / 2;
+    }
+
+    return { x, y };
+  }
+
+  getScaledTrainTileSize(row: TrainRowLayout): { width: number; height: number } {
     return {
-      x: row.x + tileIndex * (tileWidth + tilePadding) + tilePadding,
-      y: row.y + (row.height - this.config.tileHeight) / 2,
+      width: Math.floor(ATLAS_TILE_W * row.tileScale),
+      height: Math.floor(ATLAS_TILE_H * row.tileScale),
     };
   }
 

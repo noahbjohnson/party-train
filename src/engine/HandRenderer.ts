@@ -32,6 +32,7 @@ export class HandRenderer {
         this.tileRenderer.createTileElement(tile, true);
       }
 
+      this.tileRenderer.setSize(tile.id, handLayout.tileWidth, handLayout.tileHeight);
       this.tileRenderer.setPosition(tile.id, pos.x, pos.y);
       this.tileRenderer.setRotation(tile.id, 0);
     }
