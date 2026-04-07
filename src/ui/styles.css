@@ -619,3 +619,160 @@
   outline: 2px solid rgba(255, 215, 0, 0.6);
   outline-offset: -2px;
 }
+
+/* === Mobile Landscape === */
+@media (max-height: 500px) {
+  .top-bar {
+    height: 28px;
+    padding: 0 8px;
+  }
+
+  .round-indicator {
+    font-size: 12px;
+  }
+
+  .sidebar {
+    top: 28px;
+    width: 70px;
+  }
+
+  .sidebar-btn {
+    padding: 6px 4px;
+    font-size: 10px;
+  }
+
+  .game-area {
+    top: 28px;
+    left: 70px;
+    right: 140px;
+    bottom: 80px;
+  }
+
+  .train-row {
+    height: 50px;
+  }
+
+  .hand-area {
+    left: 70px;
+    right: 140px;
+    height: 80px;
+  }
+
+  .player-panel {
+    top: 28px;
+    width: 140px;
+    bottom: 80px;
+  }
+
+  .panel-row {
+    height: 50px;
+    padding: 0 6px;
+  }
+
+  .panel-name {
+    font-size: 10px;
+  }
+
+  .panel-detail {
+    font-size: 10px;
+  }
+
+  .info-panel {
+    width: 140px;
+    height: 80px;
+    padding: 6px;
+  }
+
+  .info-label {
+    font-size: 9px;
+  }
+
+  .info-value {
+    font-size: 14px;
+  }
+
+  .bone-pile-count {
+    font-size: 20px;
+  }
+}
+
+/* === Mobile Portrait === */
+@media (max-width: 768px) and (min-height: 501px) {
+  .top-bar {
+    height: 32px;
+    padding: 0 8px;
+  }
+
+  .round-indicator {
+    font-size: 13px;
+  }
+
+  .sidebar {
+    top: 32px;
+    left: 0;
+    right: 0;
+    bottom: auto;
+    width: auto;
+    height: 40px;
+    flex-direction: row;
+    gap: 4px;
+    padding: 4px;
+    overflow-x: auto;
+  }
+
+  .sidebar-btn {
+    padding: 6px 10px;
+    font-size: 11px;
+    white-space: nowrap;
+    min-width: auto;
+  }
+
+  .game-area {
+    top: 72px;
+    left: 0;
+    right: 0;
+    bottom: 100px;
+  }
+
+  .train-row {
+    height: 60px;
+  }
+
+  .hand-area {
+    left: 0;
+    right: 0;
+    height: 100px;
+  }
+
+  .player-panel {
+    display: none;
+  }
+
+  .info-panel {
+    display: none;
+  }
+
+  .tile:hover {
+    transform: none;
+  }
+
+  .setup-panel {
+    padding: 24px;
+    min-width: auto;
+    width: 90vw;
+  }
+
+  .setup-panel h1 {
+    font-size: 22px;
+  }
+
+  .help-panel {
+    width: 95vw;
+  }
+
+  .score-panel {
+    min-width: auto;
+    width: 90vw;
+    padding: 20px;
+  }
+}

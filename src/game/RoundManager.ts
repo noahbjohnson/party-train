@@ -39,9 +39,9 @@ export function initializeRound(
   }
   trains.set('party', createTrain('party', null, hubValue));
 
-  // Determine first player — who had the starting double (or first player if it was in boneyard)
-  // Since we removed it from the set before dealing, use round index or random
-  const firstPlayerIndex = roundIndex % players.length;
+  // Rotate starting player each round — offset by round so different player starts each time
+  // Adding 1 ensures round 0 doesn't always start with player 0 (the human)
+  const firstPlayerIndex = (roundIndex + 1) % players.length;
 
   return {
     round: roundIndex,
